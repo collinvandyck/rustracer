@@ -2,6 +2,8 @@
 
 use std::ops;
 
+pub static ORIGIN: Tuple4 = Tuple4([0.0, 0.0, 0.0, 0.0]);
+
 pub fn point(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Point {
     Point::new(x, y, z)
 }
@@ -92,6 +94,15 @@ impl Vector {
         let tup = self.tup - rhs.tup;
         Vector { tup }
     }
+    pub fn magnitude(self) -> Num {
+        let sum = self.x().powi(2) + self.y().powi(2) + self.z().powi(2) + self.w().powi(2);
+        sum.sqrt()
+    }
+    pub fn normalize(&self) -> Vector {
+        let mag = self.magnitude();
+        let tup = self.tup.div_scalar(mag);
+        Vector { tup }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -155,7 +166,7 @@ impl Tuple4 {
     pub fn set_z(&mut self, num: Num) {
         self.0[2] = num
     }
-    pub fn mul(self, num: impl Into<Num>) -> Self {
+    pub fn mul_scalar(self, num: impl Into<Num>) -> Self {
         let num = num.into();
         Self([
             self.x() * num,
@@ -164,13 +175,9 @@ impl Tuple4 {
             self.w() * num,
         ])
     }
-    pub fn div(self, num: impl Into<Num>) -> Self {
+    pub fn div_scalar(self, num: impl Into<Num>) -> Self {
         let num = num.into();
-        self.mul(1.0 / num)
-    }
-    pub fn magnitude(self) -> Num {
-        let sum = self.x().powi(2) + self.y().powi(2) + self.z().powi(2) + self.w().powi(2);
-        sum.sqrt()
+        self.mul_scalar(1.0 / num)
     }
     fn w(&self) -> Num {
         self.0[3]
@@ -272,19 +279,19 @@ mod tests {
     #[test]
     fn test_multiply_tuple_by_scalar() {
         let t = tuple(1, -2, 3, -4);
-        assert_eq!(t.mul(3.5), tuple(3.5, -7, 10.5, -14));
+        assert_eq!(t.mul_scalar(3.5), tuple(3.5, -7, 10.5, -14));
     }
 
     #[test]
     fn test_multiply_tuple_by_fraction() {
         let t = tuple(1, -2, 3, -4);
-        assert_eq!(t.mul(0.5), tuple(0.5, -1, 1.5, -2));
+        assert_eq!(t.mul_scalar(0.5), tuple(0.5, -1, 1.5, -2));
     }
 
     #[test]
     fn test_divide_tuple_by_scalar() {
         let t = tuple(1, -2, 3, -4);
-        assert_eq!(t.div(2), tuple(0.5, -1, 1.5, -2));
+        assert_eq!(t.div_scalar(2), tuple(0.5, -1, 1.5, -2));
     }
 
     #[test]
@@ -299,5 +306,28 @@ mod tests {
             let mag = v.magnitude();
             assert_eq!(mag, ex, "expected {v:?}.magnitude() == {ex} but was {mag}");
         }
+    }
+
+    #[test]
+    fn test_normalize_vector() {
+        let vecs = [
+            (vector(4, 0, 0), vector(1, 0, 0)),
+            (vector(1, 2, 3), vector(0.26726, 0.53452, 0.80178)),
+        ];
+        for (v, ex) in vecs {
+            let norm = v.normalize();
+            assert_eq!(
+                norm, ex,
+                "expected {v:?}.normalize() == {ex:?} but was {norm:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_magnitude_of_normalized_vector() {
+        let v = vector(1, 2, 3);
+        let n = v.normalize();
+        let m = n.magnitude();
+        assert_eq!(m, 1.0);
     }
 }
