@@ -16,9 +16,16 @@ pub fn tuple(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>, w: impl In
 
 type Num = f64;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Point {
     tup: Tuple4,
+}
+
+impl ops::Sub for Point {
+    type Output = Vector;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.sub_point(rhs)
+    }
 }
 
 impl ops::Deref for Point {
@@ -40,9 +47,13 @@ impl Point {
             tup: Tuple4::new(x, y, z, 1),
         }
     }
+    pub fn sub_point(&self, rhs: Point) -> Vector {
+        let tup = self.tup - rhs.tup;
+        Vector { tup }
+    }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vector {
     tup: Tuple4,
 }
@@ -68,8 +79,32 @@ impl Vector {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tuple4([Num; 4]);
+
+impl ops::Add for Tuple4 {
+    type Output = Tuple4;
+    fn add(self, rhs: Self) -> Self::Output {
+        Tuple4([
+            self.x() + rhs.x(),
+            self.y() + rhs.y(),
+            self.z() + rhs.z(),
+            self.w() + rhs.w(),
+        ])
+    }
+}
+
+impl ops::Sub for Tuple4 {
+    type Output = Tuple4;
+    fn sub(self, rhs: Self) -> Self::Output {
+        Tuple4([
+            self.x() - rhs.x(),
+            self.y() - rhs.y(),
+            self.z() - rhs.z(),
+            self.w() - rhs.w(),
+        ])
+    }
+}
 
 impl Tuple4 {
     pub fn new(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>, w: impl Into<Num>) -> Self {
@@ -107,6 +142,20 @@ impl Tuple4 {
     }
 }
 
+impl PartialEq for Tuple4 {
+    fn eq(&self, other: &Self) -> bool {
+        nums_equal(self.x(), other.x())
+            && nums_equal(self.y(), other.y())
+            && nums_equal(self.z(), other.z())
+            && nums_equal(self.w(), other.w())
+    }
+}
+
+fn nums_equal(n1: impl Into<Num>, n2: impl Into<Num>) -> bool {
+    const EPSILON: f64 = 0.00001;
+    (n1.into() - n2.into()).abs() < EPSILON
+}
+
 #[cfg(test)]
 mod tests {
     use std::ops::Deref;
@@ -133,5 +182,19 @@ mod tests {
 
         let v = vector(4, -4, 3);
         assert_eq!(v.deref(), &tuple(4, -4, 3, 0));
+    }
+
+    #[test]
+    fn test_add_tuples() {
+        let a1 = tuple(3, -2, 5, 1);
+        let a2 = tuple(-2, 3, 1, 0);
+        assert_eq!(a1 + a2, tuple(1, 1, 6, 1));
+    }
+
+    #[test]
+    fn test_subtract_points() {
+        let p1 = point(3, 2, 1);
+        let p2 = point(5, 6, 7);
+        assert_eq!(p1 - p2, vector(-2, -4, -6));
     }
 }
