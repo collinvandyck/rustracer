@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::prelude::*;
 
 pub fn canvas(width: usize, height: usize) -> Canvas {
@@ -31,6 +33,14 @@ impl Canvas {
         let idx = self.idx(x, y);
         *self.pixels.get(idx).expect("invalid coords")
     }
+    pub fn ppm(&self) -> Vec<u8> {
+        use io::Write;
+        let mut buf: Vec<u8> = vec![];
+        writeln!(buf, "P3");
+        writeln!(buf, "{} {}", self.width, self.height);
+        write!(buf, "255");
+        buf
+    }
     fn idx(&self, x: usize, y: usize) -> usize {
         self.width * y + x
     }
@@ -57,5 +67,17 @@ mod tests {
         let red = color(1, 0, 0);
         c.write(2, 3, red);
         assert_eq!(c.at(2, 3), red);
+    }
+
+    #[test]
+    fn test_constructing_ppm_header() {
+        let c = canvas(5, 3);
+        let ppm = c.ppm();
+        let ppm = String::from_utf8(ppm).unwrap();
+        let ppm = ppm.split('\n').collect::<Vec<_>>();
+        assert_eq!(ppm.len(), 3);
+        assert_eq!(ppm[0], "P3");
+        assert_eq!(ppm[1], "5 3");
+        assert_eq!(ppm[2], "255");
     }
 }
