@@ -103,6 +103,16 @@ impl Vector {
         let tup = self.tup.div_scalar(mag);
         Vector { tup }
     }
+    pub fn dot(&self, other: Self) -> Num {
+        self.tup.dot(other.tup)
+    }
+    pub fn cross(&self, other: Self) -> Self {
+        Self::new(
+            self.y() * other.z() - self.z() * other.y(),
+            self.z() * other.x() - self.x() * other.z(),
+            self.x() * other.y() - self.y() * other.x(),
+        )
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -178,6 +188,9 @@ impl Tuple4 {
     pub fn div_scalar(self, num: impl Into<Num>) -> Self {
         let num = num.into();
         self.mul_scalar(1.0 / num)
+    }
+    pub fn dot(self, rhs: Self) -> Num {
+        self.x() * rhs.x() + self.y() * rhs.y() + self.z() * rhs.z() + self.w() + rhs.w()
     }
     fn w(&self) -> Num {
         self.0[3]
@@ -329,5 +342,20 @@ mod tests {
         let n = v.normalize();
         let m = n.magnitude();
         assert_eq!(m, 1.0);
+    }
+
+    #[test]
+    fn test_dot_product_of_two_tuples() {
+        let a = vector(1, 2, 3);
+        let b = vector(2, 3, 4);
+        assert_eq!(a.dot(b), 20.0);
+    }
+
+    #[test]
+    fn test_cross_product_of_two_vectors() {
+        let a = vector(1, 2, 3);
+        let b = vector(2, 3, 4);
+        assert_eq!(a.cross(b), vector(-1, 2, -1));
+        assert_eq!(b.cross(a), vector(1, -2, 1));
     }
 }
