@@ -47,15 +47,26 @@ impl Point {
             tup: Tuple4::new(x, y, z, 1),
         }
     }
-    pub fn sub_point(&self, rhs: Point) -> Vector {
+    fn sub_point(&self, rhs: Point) -> Vector {
         let tup = self.tup - rhs.tup;
         Vector { tup }
+    }
+    pub fn sub_vector(&self, rhs: Vector) -> Point {
+        let tup = self.tup - rhs.tup;
+        Point { tup }
     }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vector {
     tup: Tuple4,
+}
+
+impl ops::Sub for Vector {
+    type Output = Vector;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.sub_vector(rhs)
+    }
 }
 
 impl ops::Deref for Vector {
@@ -76,6 +87,10 @@ impl Vector {
         Self {
             tup: Tuple4::new(x, y, z, 0),
         }
+    }
+    pub fn sub_vector(&self, rhs: Vector) -> Vector {
+        let tup = self.tup - rhs.tup;
+        Vector { tup }
     }
 }
 
@@ -102,6 +117,18 @@ impl ops::Sub for Tuple4 {
             self.y() - rhs.y(),
             self.z() - rhs.z(),
             self.w() - rhs.w(),
+        ])
+    }
+}
+
+impl ops::Neg for Tuple4 {
+    type Output = Tuple4;
+    fn neg(self) -> Self::Output {
+        Tuple4([
+            -1.0 * self.x(),
+            -1.0 * self.y(),
+            -1.0 * self.z(),
+            -1.0 * self.w(),
         ])
     }
 }
@@ -196,5 +223,32 @@ mod tests {
         let p1 = point(3, 2, 1);
         let p2 = point(5, 6, 7);
         assert_eq!(p1 - p2, vector(-2, -4, -6));
+    }
+
+    #[test]
+    fn test_subtract_vector_from_point() {
+        let p1 = point(3, 2, 1);
+        let v1 = vector(5, 6, 7);
+        assert_eq!(p1.sub_vector(v1), point(-2, -4, -6));
+    }
+
+    #[test]
+    fn test_subtract_vector_from_vector() {
+        let v1 = vector(3, 2, 1);
+        let v2 = vector(5, 6, 7);
+        assert_eq!(v1 - v2, vector(-2, -4, -6));
+    }
+
+    #[test]
+    fn test_subtract_vector_from_zero_vector() {
+        let z = vector(0, 0, 0);
+        let v = vector(1, -2, 3);
+        assert_eq!(v - z, vector(1, -2, 3));
+    }
+
+    #[test]
+    fn test_negate_tuple() {
+        let a = tuple(1, -2, 3, -4);
+        assert_eq!(-a, tuple(-1, 2, -3, 4))
     }
 }
