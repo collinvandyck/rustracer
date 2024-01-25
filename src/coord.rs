@@ -183,6 +183,18 @@ impl ops::Neg for Tuple4 {
     }
 }
 
+impl ops::Mul for Tuple4 {
+    type Output = Tuple4;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Tuple4([
+            self.x() * rhs.x(),
+            self.y() * rhs.y(),
+            self.z() * rhs.z(),
+            self.w() * rhs.w(),
+        ])
+    }
+}
+
 impl Tuple4 {
     pub fn new(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>, w: impl Into<Num>) -> Self {
         Self([x.into(), y.into(), z.into(), w.into()])
