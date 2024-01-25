@@ -1,12 +1,6 @@
-#![allow(dead_code, unused)]
-
 use std::ops;
 
-pub use crate::prelude::*;
-
-pub mod prelude {
-    pub use super::*;
-}
+use crate::prelude::*;
 
 pub fn color(r: impl Into<Num>, g: impl Into<Num>, b: impl Into<Num>) -> Color {
     Color::new(r, g, b)

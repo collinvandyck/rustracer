@@ -1,5 +1,3 @@
-#![allow(dead_code, unused)]
-
 pub mod prelude {
     pub use super::*;
 }
