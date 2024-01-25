@@ -20,7 +20,7 @@ pub fn tuple(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>, w: impl In
     Tuple4::new(x, y, z, w)
 }
 
-type Num = f64;
+pub type Num = f64;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Point {
