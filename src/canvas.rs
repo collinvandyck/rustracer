@@ -22,6 +22,18 @@ impl Canvas {
             height,
         }
     }
+    pub fn write(&mut self, x: usize, y: usize, color: Color) {
+        let idx = self.idx(x, y);
+        let pixel = self.pixels.get_mut(idx).expect("invalid coords");
+        *pixel = color;
+    }
+    pub fn at(&self, x: usize, y: usize) -> Color {
+        let idx = self.idx(x, y);
+        *self.pixels.get(idx).expect("invalid coords")
+    }
+    fn idx(&self, x: usize, y: usize) -> usize {
+        self.width * y + x
+    }
 }
 
 #[cfg(test)]
@@ -37,5 +49,13 @@ mod tests {
         for pixel in c.pixels {
             assert_eq!(pixel, color(0, 0, 0));
         }
+    }
+
+    #[test]
+    fn test_writing_pixels_to_canvas() {
+        let mut c = canvas(10, 20);
+        let red = color(1, 0, 0);
+        c.write(2, 3, red);
+        assert_eq!(c.at(2, 3), red);
     }
 }
