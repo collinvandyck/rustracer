@@ -155,6 +155,23 @@ impl Tuple4 {
     pub fn set_z(&mut self, num: Num) {
         self.0[2] = num
     }
+    pub fn mul(self, num: impl Into<Num>) -> Self {
+        let num = num.into();
+        Self([
+            self.x() * num,
+            self.y() * num,
+            self.z() * num,
+            self.w() * num,
+        ])
+    }
+    pub fn div(self, num: impl Into<Num>) -> Self {
+        let num = num.into();
+        self.mul(1.0 / num)
+    }
+    pub fn magnitude(self) -> Num {
+        let sum = self.x().powi(2) + self.y().powi(2) + self.z().powi(2) + self.w().powi(2);
+        sum.sqrt()
+    }
     fn w(&self) -> Num {
         self.0[3]
     }
@@ -250,5 +267,37 @@ mod tests {
     fn test_negate_tuple() {
         let a = tuple(1, -2, 3, -4);
         assert_eq!(-a, tuple(-1, 2, -3, 4))
+    }
+
+    #[test]
+    fn test_multiply_tuple_by_scalar() {
+        let t = tuple(1, -2, 3, -4);
+        assert_eq!(t.mul(3.5), tuple(3.5, -7, 10.5, -14));
+    }
+
+    #[test]
+    fn test_multiply_tuple_by_fraction() {
+        let t = tuple(1, -2, 3, -4);
+        assert_eq!(t.mul(0.5), tuple(0.5, -1, 1.5, -2));
+    }
+
+    #[test]
+    fn test_divide_tuple_by_scalar() {
+        let t = tuple(1, -2, 3, -4);
+        assert_eq!(t.div(2), tuple(0.5, -1, 1.5, -2));
+    }
+
+    #[test]
+    fn test_compute_magnitude_of_vectors() {
+        let vecs = [
+            (vector(0, 1, 0), 1.0),
+            (vector(0, 0, 1), 1.0),
+            (vector(1, 2, 3), 14.0_f64.sqrt()),
+            (vector(-1, -2, -3), 14.0_f64.sqrt()),
+        ];
+        for (v, ex) in vecs {
+            let mag = v.magnitude();
+            assert_eq!(mag, ex, "expected {v:?}.magnitude() == {ex} but was {mag}");
+        }
     }
 }
