@@ -1,6 +1,10 @@
 #![allow(dead_code, unused)]
 
-use std::ops;
+pub mod prelude {
+    pub use super::*;
+}
+
+use std::{fmt, ops};
 
 pub static ORIGIN: Tuple4 = Tuple4([0.0, 0.0, 0.0, 0.0]);
 
@@ -43,15 +47,29 @@ impl ops::DerefMut for Point {
     }
 }
 
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Point({:.2},{:.2},{:.2})", self.x(), self.y(), self.z())
+    }
+}
+
 impl Point {
     pub fn new(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Self {
         Self {
             tup: Tuple4::new(x, y, z, 1),
         }
     }
+    fn add_point(&self, rhs: Point) -> Vector {
+        let tup = self.tup + rhs.tup;
+        Vector { tup }
+    }
     fn sub_point(&self, rhs: Point) -> Vector {
         let tup = self.tup - rhs.tup;
         Vector { tup }
+    }
+    pub fn add_vector(&self, rhs: Vector) -> Point {
+        let tup = self.tup + rhs.tup;
+        Point { tup }
     }
     pub fn sub_vector(&self, rhs: Vector) -> Point {
         let tup = self.tup - rhs.tup;
@@ -62,6 +80,13 @@ impl Point {
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vector {
     tup: Tuple4,
+}
+
+impl ops::Add for Vector {
+    type Output = Vector;
+    fn add(self, rhs: Self) -> Self::Output {
+        self.add_vector(rhs)
+    }
 }
 
 impl ops::Sub for Vector {
@@ -93,6 +118,10 @@ impl Vector {
     pub fn sub_vector(&self, rhs: Vector) -> Vector {
         let tup = self.tup - rhs.tup;
         Vector { tup }
+    }
+    pub fn add_vector(&self, rhs: Vector) -> Self {
+        let tup = self.tup + rhs.tup;
+        Self { tup }
     }
     pub fn magnitude(self) -> Num {
         let sum = self.x().powi(2) + self.y().powi(2) + self.z().powi(2) + self.w().powi(2);
