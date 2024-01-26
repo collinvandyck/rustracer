@@ -8,8 +8,8 @@ pub fn canvas(width: usize, height: usize) -> Canvas {
 
 pub struct Canvas {
     pixels: Vec<Color>,
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
 }
 
 impl Canvas {

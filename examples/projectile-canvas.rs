@@ -13,7 +13,7 @@ fn main() {
     };
     let red = color(1, 0, 0);
     loop {
-        canvas.write(p.pos.x() as usize, 550 - p.pos.y() as usize, red);
+        canvas.write(p.pos.x() as usize, canvas.height - p.pos.y() as usize, red);
         p = tick(&e, p);
         if p.pos.y() <= 0.0 {
             break;
