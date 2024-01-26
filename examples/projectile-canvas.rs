@@ -1,21 +1,26 @@
-use rustracer::prelude::*;
+use std::fs;
+
+use rustracer::{canvas::canvas, prelude::*};
 
 fn main() {
-    let mut p = Projectile {
-        pos: point(0, 1, 0),
-        vel: vector(1, 1, 0).normalize(),
-    };
+    let mut canvas = canvas(900, 550);
+    let start = point(0, 1, 0);
+    let vel = vector(1, 1.8, 0).normalize().mul_scalar(11.25);
+    let mut p = Projectile { pos: start, vel };
     let e = Env {
         gravity: vector(0, -0.1, 0),
         wind: vector(-0.01, 0, 0),
     };
+    let red = color(1, 0, 0);
     loop {
-        println!("p={}", p.pos);
+        canvas.write(p.pos.x() as usize, 550 - p.pos.y() as usize, red);
         p = tick(&e, p);
         if p.pos.y() <= 0.0 {
             break;
         }
     }
+    let ppm = canvas.ppm();
+    fs::write("scene.ppm", ppm).expect("could not write scene");
 }
 
 fn tick(env: &Env, proj: Projectile) -> Projectile {

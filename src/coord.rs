@@ -121,6 +121,11 @@ impl Vector {
         let tup = self.tup + rhs.tup;
         Self { tup }
     }
+    pub fn mul_scalar(&self, num: impl Into<Num>) -> Self {
+        let num = num.into();
+        let tup = self.tup.mul_scalar(num);
+        Self { tup }
+    }
     pub fn magnitude(self) -> Num {
         let sum = self.x().powi(2) + self.y().powi(2) + self.z().powi(2) + self.w().powi(2);
         sum.sqrt()
