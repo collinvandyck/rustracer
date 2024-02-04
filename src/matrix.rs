@@ -98,6 +98,11 @@ impl Matrix {
         }
     }
 
+    fn minor(&self, row: usize, col: usize) -> Num {
+        let sub = self.submatrix(row, col);
+        sub.determinant()
+    }
+
     fn submatrix(&self, del_row: usize, del_col: usize) -> Self {
         let mut dst = match self {
             Matrix::Matrix4(vs) => Matrix::Matrix3([0.0; 9]),
@@ -392,7 +397,7 @@ mod tests {
             matrix!(
                 "
             | -3 | 2 |
-            |  0 | 6  | "
+            |  0 | 6 |"
             )
         );
     }
@@ -415,6 +420,19 @@ mod tests {
             | -7 | -1 | 1  | "
             )
         );
+    }
+
+    #[test]
+    fn test_calculating_minor_of_3x3_matrix() {
+        let a = matrix!(
+            "
+            | 3  | 5  | 0  |
+            | 2  | -1 | -7 |
+            | 6  | -1 | 5  | "
+        );
+        let b = a.submatrix(1, 0);
+        assert_eq!(b.determinant(), 25.0);
+        assert_eq!(a.minor(1, 0), 25.0);
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
