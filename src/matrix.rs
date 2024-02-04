@@ -2,26 +2,73 @@ use std::usize;
 
 use super::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Matrix {
-    vals: Vec<Num>,
-    dim: usize,
+    vals: Storage,
 }
 
-impl PartialEq for Matrix {
+#[derive(Debug)]
+enum Storage {
+    Matrix4([Num; 16]),
+    Matrix3([Num; 9]),
+    Matrix2([Num; 4]),
+}
+
+impl Storage {
+    fn get(&self, row: usize, col: usize) -> Num {
+        let idx = self.idx(row, col);
+        match self {
+            Storage::Matrix4(vs) => vs[idx],
+            Storage::Matrix3(vs) => vs[idx],
+            Storage::Matrix2(vs) => vs[idx],
+        }
+    }
+    fn set(&mut self, row: usize, col: usize, val: Num) {
+        let idx = self.idx(row, col);
+        match self {
+            Storage::Matrix4(vs) => vs[idx] = val,
+            Storage::Matrix3(vs) => vs[idx] = val,
+            Storage::Matrix2(vs) => vs[idx] = val,
+        }
+    }
+    fn idx(&self, row: usize, col: usize) -> usize {
+        match self {
+            Storage::Matrix4(_) => row * 4 + col,
+            Storage::Matrix3(_) => row * 3 + col,
+            Storage::Matrix2(_) => row * 2 + col,
+        }
+    }
+}
+
+impl PartialEq for Storage {
     fn eq(&self, other: &Self) -> bool {
-        if self.dim != other.dim {
-            return false;
-        }
-        if self.vals.len() != other.vals.len() {
-            return false;
-        }
-        for idx in 0..self.vals.len() {
-            if !nums_equal(self.vals[idx], other.vals[idx]) {
-                return false;
+        match (self, other) {
+            (Storage::Matrix4(vs1), Storage::Matrix4(vs2)) => {
+                for idx in 0..vs1.len() {
+                    if !nums_equal(vs1[idx], vs2[idx]) {
+                        return false;
+                    }
+                }
+                true
             }
+            (Storage::Matrix3(vs1), Storage::Matrix3(vs2)) => {
+                for idx in 0..vs1.len() {
+                    if !nums_equal(vs1[idx], vs2[idx]) {
+                        return false;
+                    }
+                }
+                true
+            }
+            (Storage::Matrix2(vs1), Storage::Matrix2(vs2)) => {
+                for idx in 0..vs1.len() {
+                    if !nums_equal(vs1[idx], vs2[idx]) {
+                        return false;
+                    }
+                }
+                true
+            }
+            _ => false,
         }
-        true
     }
 }
 
@@ -29,20 +76,33 @@ impl Matrix {
     fn new(vals: Vec<Num>) -> Self {
         let dim = (vals.len() as f64).sqrt() as usize;
         assert_eq!(dim * dim, vals.len());
-        Self { vals, dim }
+        let vals = match dim {
+            4 => {
+                let mut arr = [0.0; 16];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix4(arr)
+            }
+            3 => {
+                let mut arr = [0.0; 9];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix3(arr)
+            }
+            2 => {
+                let mut arr = [0.0; 4];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix2(arr)
+            }
+            _ => panic!("invalid dim: {dim}"),
+        };
+        Self { vals }
     }
 
     pub fn set(&mut self, row: usize, col: usize, val: Num) {
-        let idx = self.idx(row, col);
-        self.vals[idx] = val;
+        self.vals.set(row, col, val);
     }
 
     pub fn get(&self, row: usize, col: usize) -> Num {
-        self.vals[self.idx(row, col)]
-    }
-
-    fn idx(&self, row: usize, col: usize) -> usize {
-        row * self.dim + col
+        self.vals.get(row, col)
     }
 }
 
