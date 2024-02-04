@@ -7,11 +7,23 @@ pub struct Matrix {
     vals: Storage,
 }
 
-impl std::ops::Mul for Matrix {
-    type Output = Matrix;
-    fn mul(self, rhs: Self) -> Self::Output {
+impl Matrix {
+    fn new(vals: impl IntoIterator<Item = Num>) -> Self {
+        let vals = Storage::new(vals);
+        Self { vals }
+    }
+
+    pub fn set(&mut self, row: usize, col: usize, val: Num) {
+        self.vals.set(row, col, val);
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> Num {
+        self.vals.get(row, col)
+    }
+
+    pub fn mul_matrix(&self, other: Matrix) -> Self {
         Self {
-            vals: self.vals * rhs.vals,
+            vals: self.vals.mul_storage(other.vals),
         }
     }
 }
@@ -21,13 +33,6 @@ enum Storage {
     Matrix4([Num; 16]),
     Matrix3([Num; 9]),
     Matrix2([Num; 4]),
-}
-
-impl std::ops::Mul for Storage {
-    type Output = Storage;
-    fn mul(self, rhs: Self) -> Self::Output {
-        self
-    }
 }
 
 impl Storage {
@@ -53,6 +58,9 @@ impl Storage {
             }
             _ => panic!("invalid dim: {dim}"),
         }
+    }
+    fn mul_storage(&self, other: Self) -> Self {
+        *self
     }
     fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
@@ -108,21 +116,6 @@ impl PartialEq for Storage {
             }
             _ => false,
         }
-    }
-}
-
-impl Matrix {
-    fn new(vals: impl IntoIterator<Item = Num>) -> Self {
-        let vals = Storage::new(vals);
-        Self { vals }
-    }
-
-    pub fn set(&mut self, row: usize, col: usize, val: Num) {
-        self.vals.set(row, col, val);
-    }
-
-    pub fn get(&self, row: usize, col: usize) -> Num {
-        self.vals.get(row, col)
     }
 }
 
@@ -237,7 +230,7 @@ mod tests {
             | 1  | 2  | 7  | 8  | "
         );
         assert_eq!(
-            ma * mb,
+            ma.mul_matrix(mb),
             matrix!(
                 "
             | 20  | 22  | 50  | 48  |
