@@ -34,15 +34,15 @@ mod tests {
     use anyhow::Context;
     use std::result::Result as StdResult;
 
-    macro_rules! matrix4 {
+    macro_rules! matrix {
         ($s:expr) => {
-            matrix4_from_spec($s).unwrap()
+            matrix_from_spec($s).unwrap()
         };
     }
 
     #[test]
     fn test_constructing_and_inspecting() {
-        let m = matrix4!(
+        let m = matrix!(
             "
             | 1    | 2    | 3    | 4    |
             | 5.5  | 6.5  | 7.5  | 8.5  |
@@ -58,7 +58,33 @@ mod tests {
         assert_eq!(m.get(3, 2), 15.5);
     }
 
-    fn matrix4_from_spec(spec: &str) -> anyhow::Result<Matrix> {
+    #[test]
+    fn test_2x2_matrix_representable() {
+        let m = matrix!(
+            "
+            | -3 | 5  |
+            | 1  | -2 | "
+        );
+        assert_eq!(m.get(0, 0), -3.0);
+        assert_eq!(m.get(0, 1), 5.0);
+        assert_eq!(m.get(1, 0), 1.0);
+        assert_eq!(m.get(1, 1), -2.0);
+    }
+
+    #[test]
+    fn test_3x3_matrix_representable() {
+        let m = matrix!(
+            "
+            | -3 | 5  | 0  |
+            | 1  | -2 | -7 |
+            | 0  | 1  | 1  | "
+        );
+        assert_eq!(m.get(0, 0), -3.0);
+        assert_eq!(m.get(1, 1), -2.0);
+        assert_eq!(m.get(2, 2), 1.0);
+    }
+
+    fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
         let vals = spec
             .split('|')
             .map(str::trim)
