@@ -2,40 +2,14 @@ use std::usize;
 
 use super::prelude::*;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub struct Matrix {
-    vals: Storage,
-}
-
-impl Matrix {
-    fn new(vals: impl IntoIterator<Item = Num>) -> Self {
-        let vals = Storage::new(vals);
-        Self { vals }
-    }
-
-    pub fn set(&mut self, row: usize, col: usize, val: Num) {
-        self.vals.set(row, col, val);
-    }
-
-    pub fn get(&self, row: usize, col: usize) -> Num {
-        self.vals.get(row, col)
-    }
-
-    pub fn mul_matrix(&self, other: Matrix) -> Self {
-        Self {
-            vals: self.vals.mul_storage(other.vals),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy)]
-enum Storage {
+pub enum Matrix {
     Matrix4([Num; 16]),
     Matrix3([Num; 9]),
     Matrix2([Num; 4]),
 }
 
-impl Storage {
+impl Matrix {
     fn new(vals: impl IntoIterator<Item = Num>) -> Self {
         let vals = vals.into_iter().collect::<Vec<_>>();
         let dim = (vals.len() as f64).sqrt() as usize;
@@ -44,53 +18,95 @@ impl Storage {
             4 => {
                 let mut arr = [0.0; 16];
                 arr.copy_from_slice(&vals);
-                Storage::Matrix4(arr)
+                Matrix::Matrix4(arr)
             }
             3 => {
                 let mut arr = [0.0; 9];
                 arr.copy_from_slice(&vals);
-                Storage::Matrix3(arr)
+                Matrix::Matrix3(arr)
             }
             2 => {
                 let mut arr = [0.0; 4];
                 arr.copy_from_slice(&vals);
-                Storage::Matrix2(arr)
+                Matrix::Matrix2(arr)
             }
             _ => panic!("invalid dim: {dim}"),
         }
     }
-    fn mul_storage(&self, other: Self) -> Self {
-        *self
+
+    fn mul_matrix(&self, other: Self) -> Self {
+        assert!(
+            self.same_variant(other),
+            "matrices are of different dimensions"
+        );
+        let mut dst = *self;
+        for row in 0..self.rows() {
+            for col in 0..self.cols() {
+                let val = (0..self.dim())
+                    .map(|i| self.get(row, i) * other.get(i, col))
+                    .sum();
+                dst.set(row, col, val);
+            }
+        }
+        return dst;
     }
+
     fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
         match self {
-            Storage::Matrix4(vs) => vs[idx],
-            Storage::Matrix3(vs) => vs[idx],
-            Storage::Matrix2(vs) => vs[idx],
+            Matrix::Matrix4(vs) => vs[idx],
+            Matrix::Matrix3(vs) => vs[idx],
+            Matrix::Matrix2(vs) => vs[idx],
         }
     }
+
     fn set(&mut self, row: usize, col: usize, val: Num) {
         let idx = self.idx(row, col);
         match self {
-            Storage::Matrix4(vs) => vs[idx] = val,
-            Storage::Matrix3(vs) => vs[idx] = val,
-            Storage::Matrix2(vs) => vs[idx] = val,
+            Matrix::Matrix4(vs) => vs[idx] = val,
+            Matrix::Matrix3(vs) => vs[idx] = val,
+            Matrix::Matrix2(vs) => vs[idx] = val,
         }
     }
+
     fn idx(&self, row: usize, col: usize) -> usize {
         match self {
-            Storage::Matrix4(_) => row * 4 + col,
-            Storage::Matrix3(_) => row * 3 + col,
-            Storage::Matrix2(_) => row * 2 + col,
+            Matrix::Matrix4(_) => row * 4 + col,
+            Matrix::Matrix3(_) => row * 3 + col,
+            Matrix::Matrix2(_) => row * 2 + col,
+        }
+    }
+
+    fn rows(&self) -> usize {
+        self.dim()
+    }
+
+    fn cols(&self) -> usize {
+        self.dim()
+    }
+
+    fn dim(&self) -> usize {
+        match self {
+            Matrix::Matrix4(_) => 4,
+            Matrix::Matrix3(_) => 3,
+            Matrix::Matrix2(_) => 2,
+        }
+    }
+
+    fn same_variant(&self, other: Self) -> bool {
+        match (self, other) {
+            (Matrix::Matrix4(_), Matrix::Matrix4(_)) => true,
+            (Matrix::Matrix3(_), Matrix::Matrix3(_)) => true,
+            (Matrix::Matrix2(_), Matrix::Matrix2(_)) => true,
+            _ => false,
         }
     }
 }
 
-impl PartialEq for Storage {
+impl PartialEq for Matrix {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Storage::Matrix4(vs1), Storage::Matrix4(vs2)) => {
+            (Matrix::Matrix4(vs1), Matrix::Matrix4(vs2)) => {
                 for idx in 0..vs1.len() {
                     if !nums_equal(vs1[idx], vs2[idx]) {
                         return false;
@@ -98,7 +114,7 @@ impl PartialEq for Storage {
                 }
                 true
             }
-            (Storage::Matrix3(vs1), Storage::Matrix3(vs2)) => {
+            (Matrix::Matrix3(vs1), Matrix::Matrix3(vs2)) => {
                 for idx in 0..vs1.len() {
                     if !nums_equal(vs1[idx], vs2[idx]) {
                         return false;
@@ -106,7 +122,7 @@ impl PartialEq for Storage {
                 }
                 true
             }
-            (Storage::Matrix2(vs1), Storage::Matrix2(vs2)) => {
+            (Matrix::Matrix2(vs1), Matrix::Matrix2(vs2)) => {
                 for idx in 0..vs1.len() {
                     if !nums_equal(vs1[idx], vs2[idx]) {
                         return false;
