@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.79"
+once_cell = "1.19.0"
+

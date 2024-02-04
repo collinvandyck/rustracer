@@ -1,6 +1,20 @@
 use std::usize;
 
+use once_cell::sync::Lazy;
+
 use super::prelude::*;
+
+pub static IDENTITY: Lazy<Matrix> = Lazy::new(|| {
+    let mut m = Matrix::Matrix4([0.0; 16]);
+    for i in 0..4 {
+        m.set(i, i, 1.0);
+    }
+    m
+});
+
+pub fn identity_matrix() -> Matrix {
+    *IDENTITY
+}
 
 #[derive(Debug, Clone, Copy)]
 pub enum Matrix {
@@ -283,6 +297,18 @@ mod tests {
         );
         let b = tuple(1, 2, 3, 1);
         assert_eq!(ma.mul_tuple(b), tuple(18, 24, 33, 1));
+    }
+
+    #[test]
+    fn test_multiplying_matrix_by_identity() {
+        let m = matrix!(
+            "
+            | 0  | 1  | 2  | 4  |
+            | 1  | 2  | 4  | 8  |
+            | 2  | 4  | 8  | 16 |
+            | 4  | 8  | 16 | 32 | "
+        );
+        assert_eq!(m.mul_matrix(identity_matrix()), m);
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
