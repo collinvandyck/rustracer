@@ -90,6 +90,28 @@ impl Matrix {
         dst
     }
 
+    fn determinant(&self) -> Num {
+        match self {
+            Matrix::Matrix4(_) => todo!(),
+            Matrix::Matrix3(_) => todo!(),
+            Matrix::Matrix2(_) => self.get(0, 0) * self.get(1, 1) - self.get(0, 1) * self.get(1, 0),
+        }
+    }
+
+    fn submatrix(&self, del_row: usize, del_col: usize) -> Self {
+        let mut dst = match self {
+            Matrix::Matrix4(vs) => Matrix::Matrix3([0.0; 9]),
+            Matrix::Matrix3(vs) => Matrix::Matrix2([0.0; 4]),
+            Matrix::Matrix2(vs) => panic!("submatrix of 2x2 not allowed"),
+        };
+        for (dr, row) in (0..self.rows()).filter(|i| i != &del_row).enumerate() {
+            for (dc, col) in (0..self.cols()).filter(|i| i != &del_col).enumerate() {
+                dst.set(dr, dc, self.get(row, col));
+            }
+        }
+        dst
+    }
+
     fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
         match self {
@@ -345,6 +367,54 @@ mod tests {
     #[test]
     fn test_transpose_identity_matrix() {
         assert_eq!(identity_matrix().transpose(), identity_matrix());
+    }
+
+    #[test]
+    fn test_determinant_of_2x2_matrix() {
+        let m = matrix!(
+            "
+            | 1  | 5  |
+            | -3 | 2  | "
+        );
+        assert_eq!(m.determinant(), 17.0);
+    }
+
+    #[test]
+    fn test_submatrix_of_3x3_matrix() {
+        let m = matrix!(
+            "
+            | 1  | 5  | 0  |
+            | -3 | 2  | 7  |
+            | 0  | 6  | -3 | "
+        );
+        assert_eq!(
+            m.submatrix(0, 2),
+            matrix!(
+                "
+            | -3 | 2 |
+            |  0 | 6  | "
+            )
+        );
+    }
+
+    #[test]
+    fn test_submatrix_of_4x4_matrix() {
+        let m = matrix!(
+            "
+            | -6 | 1  | 1  | 6  |
+            | -8 | 5  | 8  | 6  |
+            | -1 | 0  | 8  | 2  |
+            | -7 | 1  | -1 | 1  | "
+        );
+        assert_eq!(
+            m.submatrix(2, 1),
+            matrix!(
+                "
+            | -6 | 1  | 6  |
+            | -8 | 8  | 6  |
+            | -7 | -1 | 1  | "
+            )
+        );
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
