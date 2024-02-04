@@ -2,19 +2,58 @@ use std::usize;
 
 use super::prelude::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Matrix {
     vals: Storage,
 }
 
-#[derive(Debug)]
+impl std::ops::Mul for Matrix {
+    type Output = Matrix;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self {
+            vals: self.vals * rhs.vals,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 enum Storage {
     Matrix4([Num; 16]),
     Matrix3([Num; 9]),
     Matrix2([Num; 4]),
 }
 
+impl std::ops::Mul for Storage {
+    type Output = Storage;
+    fn mul(self, rhs: Self) -> Self::Output {
+        self
+    }
+}
+
 impl Storage {
+    fn new(vals: impl IntoIterator<Item = Num>) -> Self {
+        let vals = vals.into_iter().collect::<Vec<_>>();
+        let dim = (vals.len() as f64).sqrt() as usize;
+        assert_eq!(dim * dim, vals.len());
+        match dim {
+            4 => {
+                let mut arr = [0.0; 16];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix4(arr)
+            }
+            3 => {
+                let mut arr = [0.0; 9];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix3(arr)
+            }
+            2 => {
+                let mut arr = [0.0; 4];
+                arr.copy_from_slice(&vals);
+                Storage::Matrix2(arr)
+            }
+            _ => panic!("invalid dim: {dim}"),
+        }
+    }
     fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
         match self {
@@ -73,27 +112,8 @@ impl PartialEq for Storage {
 }
 
 impl Matrix {
-    fn new(vals: Vec<Num>) -> Self {
-        let dim = (vals.len() as f64).sqrt() as usize;
-        assert_eq!(dim * dim, vals.len());
-        let vals = match dim {
-            4 => {
-                let mut arr = [0.0; 16];
-                arr.copy_from_slice(&vals);
-                Storage::Matrix4(arr)
-            }
-            3 => {
-                let mut arr = [0.0; 9];
-                arr.copy_from_slice(&vals);
-                Storage::Matrix3(arr)
-            }
-            2 => {
-                let mut arr = [0.0; 4];
-                arr.copy_from_slice(&vals);
-                Storage::Matrix2(arr)
-            }
-            _ => panic!("invalid dim: {dim}"),
-        };
+    fn new(vals: impl IntoIterator<Item = Num>) -> Self {
+        let vals = Storage::new(vals);
         Self { vals }
     }
 
@@ -198,6 +218,34 @@ mod tests {
             | 4 | 3 | 2 | 1 |"
         );
         assert_ne!(ma, mb);
+    }
+
+    #[test]
+    fn test_multiplying_two_matrixes() {
+        let ma = matrix!(
+            "
+            | 1 | 2 | 3 | 4 |
+            | 5 | 6 | 7 | 8 |
+            | 9 | 8 | 7 | 6 |
+            | 5 | 4 | 3 | 2 | "
+        );
+        let mb = matrix!(
+            "
+            | -2 | 1  | 2  | 3  |
+            | 3  | 2  | 1  | -1 |
+            | 4  | 3  | 6  | 5  |
+            | 1  | 2  | 7  | 8  | "
+        );
+        assert_eq!(
+            ma * mb,
+            matrix!(
+                "
+            | 20  | 22  | 50  | 48  |
+            | 44  | 54  | 114 | 108 |
+            | 40  | 58  | 110 | 102 |
+            | 16  | 26  | 46  | 42  | "
+            )
+        );
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
