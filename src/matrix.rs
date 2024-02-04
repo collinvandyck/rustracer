@@ -81,7 +81,13 @@ impl Matrix {
     }
 
     fn transpose(&self) -> Self {
-        todo!()
+        let mut dst = *self;
+        for row in 0..self.rows() {
+            for col in 0..self.cols() {
+                dst.set(col, row, self.get(row, col));
+            }
+        }
+        dst
     }
 
     fn get(&self, row: usize, col: usize) -> Num {
