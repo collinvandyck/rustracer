@@ -2,34 +2,21 @@ use std::usize;
 
 use super::prelude::*;
 
-pub fn matrix() -> Matrix4 {
-    Matrix4::new()
+pub struct Matrix {
+    vals: Vec<Num>,
+    dim: usize,
 }
 
-pub struct Matrix4 {
-    vals: [Num; 16],
-}
-
-impl std::ops::Deref for Matrix4 {
-    type Target = [Num; 16];
-    fn deref(&self) -> &Self::Target {
-        &self.vals
-    }
-}
-
-impl std::ops::DerefMut for Matrix4 {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.vals
-    }
-}
-
-impl Matrix4 {
-    fn new() -> Self {
-        Self { vals: [0.0; 16] }
+impl Matrix {
+    fn new(vals: Vec<Num>) -> Self {
+        let dim = (vals.len() as f64).sqrt() as usize;
+        assert_eq!(dim * dim, vals.len());
+        Self { vals, dim }
     }
 
     pub fn set(&mut self, row: usize, col: usize, val: Num) {
-        self.vals[self.idx(row, col)] = val;
+        let idx = self.idx(row, col);
+        self.vals[idx] = val;
     }
 
     pub fn get(&self, row: usize, col: usize) -> Num {
@@ -37,7 +24,7 @@ impl Matrix4 {
     }
 
     fn idx(&self, row: usize, col: usize) -> usize {
-        row * 4 + col
+        row * self.dim + col
     }
 }
 
@@ -71,7 +58,7 @@ mod tests {
         assert_eq!(m.get(3, 2), 15.5);
     }
 
-    fn matrix4_from_spec(spec: &str) -> anyhow::Result<Matrix4> {
+    fn matrix4_from_spec(spec: &str) -> anyhow::Result<Matrix> {
         let vals = spec
             .split('|')
             .map(str::trim)
@@ -79,12 +66,6 @@ mod tests {
             .map(|s| s.parse::<Num>())
             .collect::<StdResult<Vec<_>, _>>()
             .context("failed to parse nums")?;
-        let dim = (vals.len() as f64).sqrt() as usize;
-        assert_eq!(dim, 4);
-        let mut m = Matrix4::new();
-        for (idx, val) in vals.into_iter().enumerate() {
-            m.vals[idx] = val;
-        }
-        Ok(m)
+        Ok(Matrix::new(vals))
     }
 }
