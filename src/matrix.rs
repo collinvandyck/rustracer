@@ -80,6 +80,10 @@ impl Matrix {
         return dst;
     }
 
+    fn transpose(&self) -> Self {
+        todo!()
+    }
+
     fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
         match self {
@@ -309,6 +313,32 @@ mod tests {
             | 4  | 8  | 16 | 32 | "
         );
         assert_eq!(m.mul_matrix(identity_matrix()), m);
+    }
+
+    #[test]
+    fn test_transpose_a_matrix() {
+        let m = matrix!(
+            "
+            | 0 | 9 | 3 | 0 |
+            | 9 | 8 | 0 | 8 |
+            | 1 | 8 | 5 | 3 |
+            | 0 | 0 | 5 | 8 | "
+        );
+        assert_eq!(
+            m.transpose(),
+            matrix!(
+                "
+            | 0 | 9 | 1 | 0 |
+            | 9 | 8 | 8 | 0 |
+            | 3 | 0 | 5 | 5 |
+            | 0 | 8 | 3 | 8 | "
+            )
+        );
+    }
+
+    #[test]
+    fn test_transpose_identity_matrix() {
+        assert_eq!(identity_matrix().transpose(), identity_matrix());
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
