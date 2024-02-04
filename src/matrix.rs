@@ -34,6 +34,21 @@ impl Matrix {
         }
     }
 
+    fn mul_tuple(&self, tup: Tuple4) -> Tuple4 {
+        assert!(
+            matches!(self, Matrix::Matrix4(_)),
+            "invalid tuple for matrix"
+        );
+        let mut dst = tup.clone();
+        for row in 0..self.rows() {
+            dst.set(
+                row,
+                (0..self.dim()).map(|i| self.get(row, i) * tup.get(i)).sum(),
+            );
+        }
+        dst
+    }
+
     fn mul_matrix(&self, other: Self) -> Self {
         assert!(
             self.same_variant(other),
@@ -255,6 +270,19 @@ mod tests {
             | 16  | 26  | 46  | 42  | "
             )
         );
+    }
+
+    #[test]
+    fn test_multiply_matrix_by_a_tuple() {
+        let ma = matrix!(
+            "
+            | 1 | 2 | 3 | 4 |
+            | 2 | 4 | 4 | 2 |
+            | 8 | 6 | 4 | 1 |
+            | 0 | 0 | 0 | 1 | "
+        );
+        let b = tuple(1, 2, 3, 1);
+        assert_eq!(ma.mul_tuple(b), tuple(18, 24, 33, 1));
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {

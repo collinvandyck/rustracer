@@ -203,22 +203,34 @@ impl Tuple4 {
         Self([x.into(), y.into(), z.into(), w.into()])
     }
     pub fn x(&self) -> Num {
-        self.0[0]
+        self.get(0)
     }
     pub fn y(&self) -> Num {
-        self.0[1]
+        self.get(1)
     }
     pub fn z(&self) -> Num {
-        self.0[2]
+        self.get(2)
+    }
+    fn w(&self) -> Num {
+        self.get(3)
+    }
+    pub fn get(&self, idx: usize) -> Num {
+        self.0[idx]
     }
     pub fn set_x(&mut self, num: Num) {
-        self.0[0] = num
+        self.set(0, num);
     }
     pub fn set_y(&mut self, num: Num) {
-        self.0[1] = num
+        self.set(1, num);
     }
     pub fn set_z(&mut self, num: Num) {
-        self.0[2] = num
+        self.set(2, num);
+    }
+    fn set_w(&mut self, num: Num) {
+        self.set(3, num)
+    }
+    pub fn set(&mut self, idx: usize, num: Num) {
+        self.0[idx] = num;
     }
     pub fn mul_scalar(self, num: impl Into<Num>) -> Self {
         let num = num.into();
@@ -235,12 +247,6 @@ impl Tuple4 {
     }
     pub fn dot(self, rhs: Self) -> Num {
         self.x() * rhs.x() + self.y() * rhs.y() + self.z() * rhs.z() + self.w() + rhs.w()
-    }
-    fn w(&self) -> Num {
-        self.0[3]
-    }
-    fn set_w(&mut self, num: Num) {
-        self.0[3] = num;
     }
     fn is_point(&self) -> bool {
         self.0[3] == 1.0
