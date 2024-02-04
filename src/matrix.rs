@@ -2,9 +2,27 @@ use std::usize;
 
 use super::prelude::*;
 
+#[derive(Debug)]
 pub struct Matrix {
     vals: Vec<Num>,
     dim: usize,
+}
+
+impl PartialEq for Matrix {
+    fn eq(&self, other: &Self) -> bool {
+        if self.dim != other.dim {
+            return false;
+        }
+        if self.vals.len() != other.vals.len() {
+            return false;
+        }
+        for idx in 0..self.vals.len() {
+            if !nums_equal(self.vals[idx], other.vals[idx]) {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 impl Matrix {
@@ -82,6 +100,25 @@ mod tests {
         assert_eq!(m.get(0, 0), -3.0);
         assert_eq!(m.get(1, 1), -2.0);
         assert_eq!(m.get(2, 2), 1.0);
+    }
+
+    #[test]
+    fn test_matrix_equality_with_identical_matrices() {
+        let ma = matrix!(
+            "
+            | 1 | 2 | 3 | 4 |
+            | 5 | 6 | 7 | 8 |
+            | 9 | 8 | 7 | 6 |
+            | 5 | 4 | 3 | 2 | "
+        );
+        let mb = matrix!(
+            "
+            | 1 | 2 | 3 | 4 |
+            | 5 | 6 | 7 | 8 |
+            | 9 | 8 | 7 | 6 |
+            | 5 | 4 | 3 | 2 | "
+        );
+        assert_eq!(ma, mb);
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {

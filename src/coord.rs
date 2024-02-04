@@ -259,7 +259,7 @@ impl PartialEq for Tuple4 {
     }
 }
 
-fn nums_equal(n1: impl Into<Num>, n2: impl Into<Num>) -> bool {
+pub fn nums_equal(n1: impl Into<Num>, n2: impl Into<Num>) -> bool {
     const EPSILON: f64 = 0.00001;
     (n1.into() - n2.into()).abs() < EPSILON
 }
