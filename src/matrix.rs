@@ -103,6 +103,10 @@ impl Matrix {
         sub.determinant()
     }
 
+    fn cofactor(&self, row: usize, col: usize) -> Num {
+        todo!()
+    }
+
     fn submatrix(&self, del_row: usize, del_col: usize) -> Self {
         let mut dst = match self {
             Matrix::Matrix4(vs) => Matrix::Matrix3([0.0; 9]),
@@ -433,6 +437,20 @@ mod tests {
         let b = a.submatrix(1, 0);
         assert_eq!(b.determinant(), 25.0);
         assert_eq!(a.minor(1, 0), 25.0);
+    }
+
+    #[test]
+    fn test_calculating_cofactor_of_3x3_matrix() {
+        let a = matrix!(
+            "
+            | 3  | 5  | 0  |
+            | 2  | -1 | -7 |
+            | 6  | -1 | 5  | "
+        );
+        assert_eq!(a.minor(0, 0), -12.0);
+        assert_eq!(a.cofactor(0, 0), -12.0);
+        assert_eq!(a.minor(1, 0), 25.0);
+        assert_eq!(a.cofactor(1, 0), -25.0);
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
