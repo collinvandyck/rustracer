@@ -104,7 +104,12 @@ impl Matrix {
     }
 
     fn cofactor(&self, row: usize, col: usize) -> Num {
-        todo!()
+        let minor = self.minor(row, col);
+        if (row + col) % 2 == 1 {
+            -minor
+        } else {
+            minor
+        }
     }
 
     fn submatrix(&self, del_row: usize, del_col: usize) -> Self {
