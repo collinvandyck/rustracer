@@ -98,6 +98,18 @@ pub struct Vector {
     tup: Tuple4,
 }
 
+impl From<Vector> for Tuple4 {
+    fn from(value: Vector) -> Self {
+        value.tup
+    }
+}
+
+impl PartialEq<Vector> for Tuple4 {
+    fn eq(&self, other: &Vector) -> bool {
+        self == &other.tup
+    }
+}
+
 impl ops::Add for Vector {
     type Output = Vector;
     fn add(self, rhs: Self) -> Self::Output {

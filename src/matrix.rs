@@ -126,7 +126,7 @@ impl Matrix {
         dst
     }
 
-    fn inverse(&self) -> Self {
+    pub fn inverse(&self) -> Self {
         if !self.invertible() {
             panic!("matrix is not invertible");
         }
