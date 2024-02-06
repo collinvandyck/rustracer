@@ -25,6 +25,18 @@ pub struct Point {
     tup: Tuple4,
 }
 
+impl PartialEq<Tuple4> for Point {
+    fn eq(&self, other: &Tuple4) -> bool {
+        &self.tup == other
+    }
+}
+
+impl PartialEq<Point> for Tuple4 {
+    fn eq(&self, other: &Point) -> bool {
+        self == &other.tup
+    }
+}
+
 impl ops::Sub for Point {
     type Output = Vector;
     fn sub(self, rhs: Self) -> Self::Output {
@@ -48,6 +60,12 @@ impl ops::DerefMut for Point {
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Point({:.2},{:.2},{:.2})", self.x(), self.y(), self.z())
+    }
+}
+
+impl From<Point> for Tuple4 {
+    fn from(value: Point) -> Self {
+        value.tup
     }
 }
 

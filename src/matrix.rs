@@ -1,8 +1,6 @@
-use std::usize;
-
-use once_cell::sync::Lazy;
-
 use super::prelude::*;
+use once_cell::sync::Lazy;
+use std::usize;
 
 pub static IDENTITY: Lazy<Matrix> = Lazy::new(|| {
     let mut m = Matrix::Matrix4([0.0; 16]);
@@ -48,11 +46,9 @@ impl Matrix {
         }
     }
 
-    fn mul_tuple(&self, tup: Tuple4) -> Tuple4 {
-        assert!(
-            matches!(self, Matrix::Matrix4(_)),
-            "invalid tuple for matrix"
-        );
+    pub fn mul_tuple(&self, tup: impl Into<Tuple4>) -> Tuple4 {
+        let tup = tup.into();
+        assert_eq!(self.dim(), 4, "cannot multiply");
         let mut dst = tup.clone();
         for row in 0..self.rows() {
             dst.set(
@@ -63,7 +59,7 @@ impl Matrix {
         dst
     }
 
-    fn mul_matrix(&self, other: Self) -> Self {
+    pub fn mul_matrix(&self, other: Self) -> Self {
         assert!(
             self.same_variant(other),
             "matrices are of different dimensions"
@@ -168,22 +164,18 @@ impl Matrix {
     }
 
     fn idx(&self, row: usize, col: usize) -> usize {
-        match self {
-            Matrix::Matrix4(_) => row * 4 + col,
-            Matrix::Matrix3(_) => row * 3 + col,
-            Matrix::Matrix2(_) => row * 2 + col,
-        }
+        row * self.dim() + col
     }
 
-    fn rows(&self) -> usize {
+    const fn rows(&self) -> usize {
         self.dim()
     }
 
-    fn cols(&self) -> usize {
+    const fn cols(&self) -> usize {
         self.dim()
     }
 
-    fn dim(&self) -> usize {
+    const fn dim(&self) -> usize {
         match self {
             Matrix::Matrix4(_) => 4,
             Matrix::Matrix3(_) => 3,
@@ -192,12 +184,7 @@ impl Matrix {
     }
 
     fn same_variant(&self, other: Self) -> bool {
-        match (self, other) {
-            (Matrix::Matrix4(_), Matrix::Matrix4(_)) => true,
-            (Matrix::Matrix3(_), Matrix::Matrix3(_)) => true,
-            (Matrix::Matrix2(_), Matrix::Matrix2(_)) => true,
-            _ => false,
-        }
+        self.dim() == other.dim()
     }
 }
 
