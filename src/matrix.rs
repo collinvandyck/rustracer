@@ -145,7 +145,7 @@ impl Matrix {
         self.determinant() != 0.0
     }
 
-    fn get(&self, row: usize, col: usize) -> Num {
+    pub fn get(&self, row: usize, col: usize) -> Num {
         let idx = self.idx(row, col);
         match self {
             Matrix::Matrix4(vs) => vs[idx],
@@ -154,7 +154,7 @@ impl Matrix {
         }
     }
 
-    fn set(&mut self, row: usize, col: usize, val: Num) {
+    pub fn set(&mut self, row: usize, col: usize, val: Num) {
         let idx = self.idx(row, col);
         match self {
             Matrix::Matrix4(vs) => vs[idx] = val,

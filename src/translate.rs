@@ -1,7 +1,11 @@
 use super::prelude::*;
 
 pub fn translation(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
-    identity_matrix()
+    let mut dst = identity_matrix();
+    dst.set(0, 3, x.into());
+    dst.set(1, 3, y.into());
+    dst.set(2, 3, z.into());
+    dst
 }
 
 #[cfg(test)]
