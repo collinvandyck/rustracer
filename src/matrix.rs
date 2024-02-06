@@ -130,6 +130,21 @@ impl Matrix {
         dst
     }
 
+    fn inverse(&self) -> Self {
+        if !self.invertible() {
+            panic!("matrix is not invertible");
+        }
+        let d = self.determinant();
+        let mut dst = *self;
+        for row in 0..self.rows() {
+            for col in 0..self.cols() {
+                let c = self.cofactor(row, col);
+                dst.set(col, row, c / d);
+            }
+        }
+        dst
+    }
+
     fn invertible(&self) -> bool {
         self.determinant() != 0.0
     }
@@ -520,6 +535,33 @@ mod tests {
         );
         assert_eq!(a.determinant(), 0.0);
         assert!(!a.invertible());
+    }
+
+    #[test]
+    fn test_calculate_inverse_of_matrix() {
+        let a = matrix!(
+            "
+            | -5 | 2  | 6  | -8 |
+            | 1  | -5 | 1  | 8  |
+            | 7  | 7  | -6 | -7 |
+            | 1  | -3 | 7  | 4  | "
+        );
+        let b = a.inverse();
+        assert_eq!(a.determinant(), 532.0);
+        assert_eq!(a.cofactor(2, 3), -160.0);
+        assert_eq!(b.get(3, 2), -160.0 / 532.0);
+        assert_eq!(a.cofactor(3, 2), 105.0);
+        assert_eq!(b.get(2, 3), 105.0 / 532.0);
+        assert_eq!(
+            b,
+            matrix!(
+                "
+            | 0.21805  | 0.45113  | 0.2406   | -0.04511 |
+            | -0.80827 | -1.45677 | -0.44361 | 0.52068  |
+            | -0.07895 | -0.22368 | -0.05263 | 0.19737  |
+            | -0.52256 | -0.81391 | -0.30075 | 0.30639  | "
+            )
+        );
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
