@@ -70,6 +70,10 @@ impl From<Point> for Tuple4 {
 }
 
 impl Point {
+    pub fn from_tup(tup: Tuple4) -> Self {
+        assert_eq!(tup.w(), 1.0);
+        Point { tup }
+    }
     pub fn new(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Self {
         Self {
             tup: Tuple4::new(x, y, z, 1),
@@ -138,6 +142,10 @@ impl ops::DerefMut for Vector {
 }
 
 impl Vector {
+    pub fn from_tup(tup: Tuple4) -> Self {
+        assert_eq!(tup.w(), 0.0);
+        Self { tup }
+    }
     pub fn new(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Self {
         Self {
             tup: Tuple4::new(x, y, z, 0),

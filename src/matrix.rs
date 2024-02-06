@@ -46,7 +46,15 @@ impl Matrix {
         }
     }
 
-    pub fn mul_tuple(&self, tup: impl Into<Tuple4>) -> Tuple4 {
+    pub fn mul_vector(&self, v: Vector) -> Vector {
+        Vector::from_tup(self.mul_tuple(v))
+    }
+
+    pub fn mul_point(&self, p: Point) -> Point {
+        Point::from_tup(self.mul_tuple(p))
+    }
+
+    fn mul_tuple(&self, tup: impl Into<Tuple4>) -> Tuple4 {
         let tup = tup.into();
         assert_eq!(self.dim(), 4, "cannot multiply");
         let mut dst = tup.clone();
