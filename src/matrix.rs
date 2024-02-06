@@ -92,9 +92,13 @@ impl Matrix {
 
     fn determinant(&self) -> Num {
         match self {
-            Matrix::Matrix4(_) => todo!(),
-            Matrix::Matrix3(_) => todo!(),
             Matrix::Matrix2(_) => self.get(0, 0) * self.get(1, 1) - self.get(0, 1) * self.get(1, 0),
+            _ => (0..self.cols())
+                .map(|i| {
+                    let cofactor = self.cofactor(0, i);
+                    self.get(0, i) * cofactor
+                })
+                .sum(),
         }
     }
 
@@ -124,6 +128,10 @@ impl Matrix {
             }
         }
         dst
+    }
+
+    fn invertible(&self) -> bool {
+        self.determinant() != 0.0
     }
 
     fn get(&self, row: usize, col: usize) -> Num {
@@ -486,6 +494,32 @@ mod tests {
         assert_eq!(a.cofactor(0, 2), 210.0);
         assert_eq!(a.cofactor(0, 3), 51.0);
         assert_eq!(a.determinant(), -4071.0);
+    }
+
+    #[test]
+    fn test_an_invertible_matrix_for_invertability() {
+        let a = matrix!(
+            "
+            | 6  | 4  | 4  | 4  |
+            | 5  | 5  | 7  | 6  |
+            | 4  | -9 | 3  | -7 |
+            | 9  | 1  | 7  | -6 | "
+        );
+        assert_eq!(a.determinant(), -2120.0);
+        assert!(a.invertible());
+    }
+
+    #[test]
+    fn test_a_noninvertible_matrix_for_invertability() {
+        let a = matrix!(
+            "
+            | -4 | 2  | -2 | -3 |
+            | 9  | 6  | 2  | 6  |
+            | 0  | -5 | 1  | -5 |
+            | 0  | 0  | 0  | 0  | "
+        );
+        assert_eq!(a.determinant(), 0.0);
+        assert!(!a.invertible());
     }
 
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
