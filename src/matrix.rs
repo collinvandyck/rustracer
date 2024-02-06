@@ -606,6 +606,26 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_multiplying_a_product_by_its_inverse() {
+        let a = matrix!(
+            "
+            | 3  | -9 | 7  | 3  |
+            | 3  | -8 | 2  | -9 |
+            | -4 | 4  | 4  | 1  |
+            | -6 | 5  | -1 | 1  | "
+        );
+        let b = matrix!(
+            "
+            | 8  | 2  | 2  | 2  |
+            | 3  | -1 | 7  | 0  |
+            | 7  | 0  | 5  | 4  |
+            | 6  | -2 | 0  | 5  | "
+        );
+        let c = a.mul_matrix(b);
+        assert_eq!(c.mul_matrix(b.inverse()), a);
+    }
+
     fn matrix_from_spec(spec: &str) -> anyhow::Result<Matrix> {
         let vals = spec
             .split('|')
