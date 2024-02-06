@@ -16,8 +16,25 @@ pub fn scaling(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matri
     dst
 }
 
+pub fn rotation_x(x: impl Into<Num>) -> Matrix {
+    let mut dst = identity_matrix();
+    dst
+}
+
+pub fn rotation_y(x: impl Into<Num>) -> Matrix {
+    let mut dst = identity_matrix();
+    dst
+}
+
+pub fn rotation_z(x: impl Into<Num>) -> Matrix {
+    let mut dst = identity_matrix();
+    dst
+}
+
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use super::*;
 
     #[test]
@@ -62,5 +79,20 @@ mod tests {
         let inv = transform.inverse();
         let v = vector(-4, 6, 8);
         assert_eq!(inv.mul_vector(v), vector(-2, 2, 2));
+    }
+
+    #[test]
+    fn test_reflection_is_scaling_by_a_negative_value() {
+        let transform = scaling(-1, 1, 1);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(-2, 3, 4));
+    }
+
+    #[test]
+    fn test_rotate_point_around_the_x_axis() {
+        let p = point(0, 1, 0);
+        let half_quarter = rotation_x(PI / 4.0);
+        let full_quarter = rotation_x(PI / 2.0);
+        assert_eq!(half_quarter.mul_point(p), point(0, FRAC_2_SQRT_PI, z))
     }
 }
