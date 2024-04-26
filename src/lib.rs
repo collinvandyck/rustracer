@@ -5,4 +5,5 @@ pub mod color;
 pub mod coord;
 pub mod matrix;
 pub mod prelude;
+pub mod rays;
 pub mod transform;
