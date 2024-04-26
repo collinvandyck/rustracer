@@ -5,13 +5,13 @@ macro_rules! chain {
         {
             IntoIterator::into_iter([$($x,)+])
                 .rev()
-                .fold(identity_matrix(), |acc, x| acc.mul_matrix(x))
+                .fold(identity(), |acc, x| acc.mul_matrix(x))
         }
     };
 }
 
 pub fn translation(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     dst.set(0, 3, x);
     dst.set(1, 3, y);
     dst.set(2, 3, z);
@@ -19,7 +19,7 @@ pub fn translation(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> M
 }
 
 pub fn scaling(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     dst.set(0, 0, x);
     dst.set(1, 1, y);
     dst.set(2, 2, z.into());
@@ -27,7 +27,7 @@ pub fn scaling(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matri
 }
 
 pub fn rotation_x(rad: impl Into<Num>) -> Matrix {
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     let rad = rad.into();
     dst.set(0, 0, 1);
     dst.set(1, 1, Num::cos(rad));
@@ -40,7 +40,7 @@ pub fn rotation_x(rad: impl Into<Num>) -> Matrix {
 
 pub fn rotation_y(rad: impl Into<Num>) -> Matrix {
     let rad = rad.into();
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     dst.set(0, 0, Num::cos(rad));
     dst.set(0, 2, Num::sin(rad));
     dst.set(1, 1, 1);
@@ -52,7 +52,7 @@ pub fn rotation_y(rad: impl Into<Num>) -> Matrix {
 
 pub fn rotation_z(rad: impl Into<Num>) -> Matrix {
     let rad = rad.into();
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     dst.set(0, 0, -Num::cos(rad));
     dst.set(0, 1, -Num::sin(rad));
     dst.set(1, 0, Num::sin(rad));
@@ -70,7 +70,7 @@ pub fn shearing(
     zx: impl Into<Num>,
     zy: impl Into<Num>,
 ) -> Matrix {
-    let mut dst = identity_matrix();
+    let mut dst = identity();
     dst.set(0, 0, 1);
     dst.set(0, 1, xy);
     dst.set(0, 2, xz);
@@ -255,10 +255,19 @@ mod tests {
         let b = scaling(5, 5, 5);
         let c = translation(10, 5, 7);
 
+        // manual
         let xf = c.mul_matrix(b).mul_matrix(a);
         assert_eq!(xf.mul_point(p), point(15, 0, 7));
 
+        // macro
         let xf = chain!(a, b, c);
+        assert_eq!(xf.mul_point(p), point(15, 0, 7));
+
+        // fluent
+        let xf = identity()
+            .rotate_x(FRAC_PI_2)
+            .scaling(5, 5, 5)
+            .translation(10, 5, 7);
         assert_eq!(xf.mul_point(p), point(15, 0, 7));
     }
 }

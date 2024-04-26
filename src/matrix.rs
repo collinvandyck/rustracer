@@ -10,7 +10,7 @@ pub static IDENTITY: Lazy<Matrix> = Lazy::new(|| {
     m
 });
 
-pub fn identity_matrix() -> Matrix {
+pub fn identity() -> Matrix {
     *IDENTITY
 }
 
@@ -44,6 +44,38 @@ impl Matrix {
             }
             _ => panic!("invalid dim: {dim}"),
         }
+    }
+
+    pub fn rotate_x(self, rad: impl Into<Num>) -> Matrix {
+        rotation_x(rad).mul_matrix(self)
+    }
+
+    pub fn rotate_y(self, rad: impl Into<Num>) -> Matrix {
+        rotation_y(rad).mul_matrix(self)
+    }
+
+    pub fn rotate_z(self, rad: impl Into<Num>) -> Matrix {
+        rotation_z(rad).mul_matrix(self)
+    }
+
+    pub fn scaling(self, x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
+        scaling(x, y, z).mul_matrix(self)
+    }
+
+    pub fn translation(self, x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
+        translation(x, y, z).mul_matrix(self)
+    }
+
+    pub fn shearing(
+        self,
+        xy: impl Into<Num>,
+        xz: impl Into<Num>,
+        yx: impl Into<Num>,
+        yz: impl Into<Num>,
+        zx: impl Into<Num>,
+        zy: impl Into<Num>,
+    ) -> Matrix {
+        shearing(xy, xz, yx, yz, zx, zy).mul_matrix(self)
     }
 
     pub fn mul_vector(&self, v: Vector) -> Vector {
@@ -373,7 +405,7 @@ mod tests {
             | 2  | 4  | 8  | 16 |
             | 4  | 8  | 16 | 32 | "
         );
-        assert_eq!(m.mul_matrix(identity_matrix()), m);
+        assert_eq!(m.mul_matrix(identity()), m);
     }
 
     #[test]
@@ -399,7 +431,7 @@ mod tests {
 
     #[test]
     fn test_transpose_identity_matrix() {
-        assert_eq!(identity_matrix().transpose(), identity_matrix());
+        assert_eq!(identity().transpose(), identity());
     }
 
     #[test]
