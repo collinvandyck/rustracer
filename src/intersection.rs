@@ -8,7 +8,7 @@ pub fn intersections(xs: impl IntoIterator<Item = Intersection>) -> Intersection
     Intersections(xs.into_iter().collect())
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Intersections(Vec<Intersection>);
 
 impl std::ops::Deref for Intersections {
@@ -18,7 +18,7 @@ impl std::ops::Deref for Intersections {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Intersection {
     t: Num,
     object: Intersected,
@@ -33,7 +33,7 @@ impl Intersection {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Intersected {
     Sphere(Sphere),
 }
