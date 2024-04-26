@@ -12,7 +12,7 @@ pub fn scaling(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matri
     let mut dst = identity_matrix();
     dst.set(0, 0, x);
     dst.set(1, 1, y);
-    dst.set(2, 2, z);
+    dst.set(2, 2, z.into());
     dst
 }
 
@@ -48,6 +48,31 @@ pub fn rotation_z(rad: impl Into<Num>) -> Matrix {
     dst.set(1, 0, Num::sin(rad));
     dst.set(1, 1, Num::cos(rad));
     dst.set(2, 2, 1);
+    dst.set(3, 3, 1);
+    dst
+}
+
+pub fn shearing(
+    xy: impl Into<Num>,
+    xz: impl Into<Num>,
+    yx: impl Into<Num>,
+    yz: impl Into<Num>,
+    zx: impl Into<Num>,
+    zy: impl Into<Num>,
+) -> Matrix {
+    let mut dst = identity_matrix();
+    dst.set(0, 0, 1);
+    dst.set(0, 1, xy);
+    dst.set(0, 2, xz);
+
+    dst.set(1, 0, yx);
+    dst.set(1, 1, 1);
+    dst.set(1, 2, yz);
+
+    dst.set(2, 0, zx);
+    dst.set(2, 1, zy);
+    dst.set(2, 2, 1);
+
     dst.set(3, 3, 1);
     dst
 }
@@ -121,7 +146,6 @@ mod tests {
             half_quarter.mul_point(p),
             point(0, SQRT_2 / 2.0, SQRT_2 / 2.0)
         );
-        // +z
         assert_eq!(full_quarter.mul_point(p), point(0, 0, 1));
     }
 
@@ -130,7 +154,6 @@ mod tests {
         let p = point(0, 1, 0);
         let half_quarter = rotation_x(PI / 4.0);
         let inv = half_quarter.inverse();
-        // -z
         assert_eq!(inv.mul_point(p), point(0, SQRT_2 / 2.0, -SQRT_2 / 2.0));
     }
 
@@ -156,5 +179,47 @@ mod tests {
             point(-SQRT_2 / 2.0, SQRT_2 / 2.0, 0)
         );
         assert_eq!(full_quarter.mul_point(p), point(-1, 0, 0));
+    }
+
+    #[test]
+    fn test_shearing_xy() {
+        let transform = shearing(1, 0, 0, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(5, 3, 4));
+    }
+
+    #[test]
+    fn test_shearing_xz() {
+        let transform = shearing(0, 1, 0, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(6, 3, 4));
+    }
+
+    #[test]
+    fn test_shearing_yx() {
+        let transform = shearing(0, 0, 1, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(2, 5, 4));
+    }
+
+    #[test]
+    fn test_shearing_yz() {
+        let transform = shearing(0, 0, 0, 1, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(2, 7, 4));
+    }
+
+    #[test]
+    fn test_shearing_zx() {
+        let transform = shearing(0, 0, 0, 0, 1, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(2, 3, 6));
+    }
+
+    #[test]
+    fn test_shearing_zy() {
+        let transform = shearing(0, 0, 0, 0, 0, 1);
+        let p = point(2, 3, 4);
+        assert_eq!(transform.mul_point(p), point(2, 3, 7));
     }
 }
