@@ -18,6 +18,14 @@ impl Ray {
         let dir = self.dir.mul_scalar(t);
         self.origin.add_vector(dir)
     }
+
+    pub fn origin(&self) -> Point {
+        self.origin
+    }
+
+    pub fn dir(&self) -> Vector {
+        self.dir
+    }
 }
 
 #[cfg(test)]
