@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, process::Command};
 
 use rustracer::{canvas::canvas, prelude::*};
 
@@ -21,6 +21,10 @@ fn main() {
     }
     let ppm = canvas.ppm();
     fs::write("scene.ppm", ppm).expect("could not write scene");
+    Command::new("open")
+        .arg("scene.ppm")
+        .output()
+        .expect("could not open scene");
 }
 
 fn tick(env: &Env, proj: Projectile) -> Projectile {
