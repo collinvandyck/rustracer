@@ -1,6 +1,5 @@
-use std::{fs, process::Command};
-
 use rustracer::{canvas::canvas, prelude::*};
+use std::{fs, process::Command};
 
 fn main() {
     let mut canvas = canvas(900, 550);
