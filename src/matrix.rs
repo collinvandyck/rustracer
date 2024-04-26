@@ -75,7 +75,7 @@ impl Matrix {
         let mut dst = *self;
         for row in 0..self.rows() {
             for col in 0..self.cols() {
-                let val = (0..self.dim())
+                let val: f64 = (0..self.dim())
                     .map(|i| self.get(row, i) * other.get(i, col))
                     .sum();
                 dst.set(row, col, val);
@@ -162,7 +162,8 @@ impl Matrix {
         }
     }
 
-    pub fn set(&mut self, row: usize, col: usize, val: Num) {
+    pub fn set(&mut self, row: usize, col: usize, val: impl Into<Num>) {
+        let val = val.into();
         let idx = self.idx(row, col);
         match self {
             Matrix::Matrix4(vs) => vs[idx] = val,
