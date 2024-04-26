@@ -13,7 +13,19 @@ pub struct Intersections(Vec<Intersection>);
 
 impl Intersections {
     pub fn hit(&self) -> Option<Intersection> {
-        todo!()
+        self.0
+            .iter()
+            .filter(|i| i.t > 0.0)
+            .fold(None, |acc, cand| match acc {
+                existing @ Some(Intersection { t, object }) => {
+                    if cand.t < t {
+                        Some(*cand)
+                    } else {
+                        existing
+                    }
+                }
+                None => Some(*cand),
+            })
     }
 }
 
