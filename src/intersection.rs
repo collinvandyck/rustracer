@@ -16,15 +16,10 @@ impl Intersections {
         self.0
             .iter()
             .filter(|i| i.t > 0.0)
-            .fold(None, |acc, cand| match acc {
-                existing @ Some(Intersection { t, object }) => {
-                    if cand.t < t {
-                        Some(*cand)
-                    } else {
-                        existing
-                    }
-                }
+            .fold(None, |mut acc, cand| match acc {
+                Some(acc) if cand.t < acc.t => Some(*cand),
                 None => Some(*cand),
+                _ => acc,
             })
     }
 }
