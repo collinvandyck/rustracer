@@ -219,4 +219,33 @@ mod tests {
         let p = point(2, 3, 4);
         assert_eq!(transform.mul_point(p), point(2, 3, 7));
     }
+
+    #[test]
+    fn test_transforms_applied_in_sequence() {
+        let p = point(1, 0, 1);
+        let a = rotation_x(FRAC_PI_2);
+        let b = scaling(5, 5, 5);
+        let c = translation(10, 5, 7);
+
+        // rotate
+        let p2 = a.mul_point(p);
+        assert_eq!(p2, point(1, -1, 0));
+        // scaling
+        let p3 = b.mul_point(p2);
+        assert_eq!(p3, point(5, -5, 0));
+        // translate
+        let p4 = c.mul_point(p3);
+        assert_eq!(p4, point(15, 0, 7));
+    }
+
+    #[test]
+    fn test_chained_transforms_in_reverse_order() {
+        let p = point(1, 0, 1);
+        let a = rotation_x(FRAC_PI_2);
+        let b = scaling(5, 5, 5);
+        let c = translation(10, 5, 7);
+
+        let xf = c.mul_matrix(b).mul_matrix(a);
+        assert_eq!(xf.mul_point(p), point(15, 0, 7));
+    }
 }
