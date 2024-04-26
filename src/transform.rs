@@ -1,5 +1,15 @@
 use super::prelude::*;
 
+macro_rules! chain {
+    ($($x:expr),+ $(,)?) => {
+        {
+            IntoIterator::into_iter([$($x,)+])
+                .rev()
+                .fold(identity_matrix(), |acc, x| acc.mul_matrix(x))
+        }
+    };
+}
+
 pub fn translation(x: impl Into<Num>, y: impl Into<Num>, z: impl Into<Num>) -> Matrix {
     let mut dst = identity_matrix();
     dst.set(0, 3, x);
@@ -239,13 +249,16 @@ mod tests {
     }
 
     #[test]
-    fn test_chained_transforms_in_reverse_order() {
+    fn test_chained_transforms() {
         let p = point(1, 0, 1);
         let a = rotation_x(FRAC_PI_2);
         let b = scaling(5, 5, 5);
         let c = translation(10, 5, 7);
 
         let xf = c.mul_matrix(b).mul_matrix(a);
+        assert_eq!(xf.mul_point(p), point(15, 0, 7));
+
+        let xf = chain!(a, b, c);
         assert_eq!(xf.mul_point(p), point(15, 0, 7));
     }
 }
