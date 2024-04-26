@@ -11,6 +11,12 @@ pub fn intersections(xs: impl IntoIterator<Item = Intersection>) -> Intersection
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Intersections(Vec<Intersection>);
 
+impl Intersections {
+    pub fn hit(&self) -> Option<Intersection> {
+        todo!()
+    }
+}
+
 impl std::ops::Deref for Intersections {
     type Target = Vec<Intersection>;
     fn deref(&self) -> &Self::Target {
@@ -74,5 +80,43 @@ mod tests {
         let i2 = intersection(2, s);
         let xs = intersections([i1, i2]);
         assert_eq!(xs.iter().map(|i| i.t).collect_vec(), vec![1.0, 2.0]);
+    }
+
+    #[test]
+    fn the_hit_all_xs_have_positive_t() {
+        let s = sphere();
+        let i1 = intersection(1, s);
+        let i2 = intersection(2, s);
+        let xs = intersections([i2, i1]);
+        assert_eq!(xs.hit(), Some(i1));
+    }
+
+    #[test]
+    fn the_hit_all_some_xs_have_negative_t() {
+        let s = sphere();
+        let i1 = intersection(-1, s);
+        let i2 = intersection(2, s);
+        let xs = intersections([i2, i2]);
+        assert_eq!(xs.hit(), Some(i2));
+    }
+
+    #[test]
+    fn the_hit_all_xs_negative_t() {
+        let s = sphere();
+        let i1 = intersection(-2, s);
+        let i2 = intersection(-1, s);
+        let xs = intersections([i2, i2]);
+        assert_eq!(xs.hit(), None);
+    }
+
+    #[test]
+    fn the_hit_is_always_the_lowest_nonneg_intersection() {
+        let s = sphere();
+        let i1 = intersection(5, s);
+        let i2 = intersection(7, s);
+        let i3 = intersection(-3, s);
+        let i4 = intersection(2, s);
+        let xs = intersections([i1, i2, i3, i4]);
+        assert_eq!(xs.hit(), Some(i4));
     }
 }
