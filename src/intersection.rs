@@ -4,7 +4,21 @@ pub fn intersection(t: impl Into<Num>, object: impl Into<Intersected>) -> Inters
     Intersection::new(t, object)
 }
 
+pub fn intersections(xs: impl IntoIterator<Item = Intersection>) -> Intersections {
+    Intersections(xs.into_iter().collect())
+}
+
 #[derive(Clone, Debug)]
+pub struct Intersections(Vec<Intersection>);
+
+impl std::ops::Deref for Intersections {
+    type Target = Vec<Intersection>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Intersection {
     t: Num,
     object: Intersected,
@@ -19,7 +33,7 @@ impl Intersection {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Intersected {
     Sphere(Sphere),
 }
@@ -51,5 +65,14 @@ mod tests {
         let i = intersection(3.5, s);
         assert_eq!(i.t, 3.5);
         assert_eq!(i.object, s);
+    }
+
+    #[test]
+    fn aggregating_intersections() {
+        let s = sphere();
+        let i1 = intersection(1, s);
+        let i2 = intersection(2, s);
+        let xs = intersections([i1, i2]);
+        assert_eq!(xs.iter().map(|i| i.t).collect_vec(), vec![1.0, 2.0]);
     }
 }
