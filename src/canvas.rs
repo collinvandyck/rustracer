@@ -59,7 +59,7 @@ impl Canvas {
                     line.clear();
                 }
                 if !line.is_empty() {
-                    line.push_str(" ");
+                    line.push(' ');
                 }
                 line.push_str(&num);
             }

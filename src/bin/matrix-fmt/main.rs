@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
 
 fn f64str(v: f64) -> String {
     format!("{v:.10}")
-        .trim_end_matches("0")
-        .trim_end_matches(".")
+        .trim_end_matches('0')
+        .trim_end_matches('.')
         .to_string()
 }

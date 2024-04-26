@@ -57,7 +57,7 @@ impl Matrix {
     fn mul_tuple(&self, tup: impl Into<Tuple4>) -> Tuple4 {
         let tup = tup.into();
         assert_eq!(self.dim(), 4, "cannot multiply");
-        let mut dst = tup.clone();
+        let mut dst = tup;
         for row in 0..self.rows() {
             dst.set(
                 row,
@@ -81,7 +81,7 @@ impl Matrix {
                 dst.set(row, col, val);
             }
         }
-        return dst;
+        dst
     }
 
     fn transpose(&self) -> Self {

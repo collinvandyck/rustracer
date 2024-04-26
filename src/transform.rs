@@ -64,15 +64,12 @@ pub fn shearing(
     dst.set(0, 0, 1);
     dst.set(0, 1, xy);
     dst.set(0, 2, xz);
-
     dst.set(1, 0, yx);
     dst.set(1, 1, 1);
     dst.set(1, 2, yz);
-
     dst.set(2, 0, zx);
     dst.set(2, 1, zy);
     dst.set(2, 2, 1);
-
     dst.set(3, 3, 1);
     dst
 }
