@@ -10,6 +10,7 @@ pub fn sphere() -> Sphere {
 pub struct Sphere {
     origin: Point,
     radius: Num,
+    tf: Matrix,
 }
 
 impl Sphere {
@@ -17,10 +18,12 @@ impl Sphere {
         Self {
             origin,
             radius: radius.into(),
+            tf: identity(),
         }
     }
 
     pub fn intersect(&self, ray: Ray) -> Intersections {
+        let ray = ray.transform(self.tf.inverse());
         let sphere_to_ray: Vector = ray.origin().sub(self.origin);
         let a: Num = ray.dir().dot(ray.dir());
         let b = 2.0 * ray.dir().dot(sphere_to_ray);
@@ -32,6 +35,10 @@ impl Sphere {
         let t1 = (-b - f64::sqrt(disc)) / (2.0 * a);
         let t2 = (-b + f64::sqrt(disc)) / (2.0 * a);
         intersections([intersection(t1, *self), intersection(t2, *self)])
+    }
+
+    pub fn set_transform(&mut self, tf: Matrix) {
+        self.tf = tf;
     }
 }
 
@@ -89,5 +96,37 @@ mod tests {
             xs,
             intersections([intersection(-6.0, s), intersection(-4.0, s),])
         );
+    }
+
+    #[test]
+    fn sphere_default_transformation() {
+        let s = sphere();
+        assert_eq!(s.tf, identity());
+    }
+
+    #[test]
+    fn change_a_sphere_transformation() {
+        let mut s = sphere();
+        let t = translation(2, 3, 4);
+        s.set_transform(t);
+        assert_eq!(s.tf, t);
+    }
+
+    #[test]
+    fn intersect_scaled_sphere_with_ray() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let mut s = sphere();
+        s.set_transform(scaling(2, 2, 2));
+        let xs = s.intersect(r);
+        assert_eq!(xs, intersections([intersection(3, s), intersection(7, s),]));
+    }
+
+    #[test]
+    fn intersection_translated_sphere_with_ray() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let mut s = sphere();
+        s.set_transform(translation(5, 0, 0));
+        let xs = s.intersect(r);
+        assert_eq!(xs, Intersections::default());
     }
 }
