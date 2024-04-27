@@ -1,45 +1,38 @@
-#![allow(unused)]
 use rustracer::{canvas::canvas, prelude::*};
-use std::{fs, process::Command};
+use std::{fs, process::Command, time::Instant};
 
 fn main() {
-    let pixels = 500;
-    let width = pixels;
-    let height = pixels;
-    let red = color(1, 0, 0);
+    let start = Instant::now();
+    let dim = 500;
+    let width = dim;
+    let height = dim;
     let mut canvas = canvas(width, height);
 
-    // unit sphere.
     let s = sphere();
-
-    // we start at z=-5, pointed towards the origin
-    let r = ray(point(0, 0, -5), vector(0, 0, 1));
-
-    // the wall will be at z=10
     let wall_z = 10.0;
-
-    // we need six units to accommodate the sphere at this distance from it. using 7 gives us
-    // margin.
     let wall_size = 7.0;
-    println!("wall size: {wall_size}");
+    let pixel_size = wall_size / (dim as f64);
+    let half = (dim as f64) / 2.0 * pixel_size;
+    let color = color(0.5, 0.25, 0);
+    let ray_p = point(0, 0, -5);
+    for y in 0..dim {
+        let wy = half - pixel_size * (y as f64);
+        for x in 0..dim {
+            let wx = -half + pixel_size * (x as f64);
+            let pos = point(wx, wy, wall_z);
+            let vec = (pos - ray_p).normalize();
+            let r = ray(ray_p, vec);
+            if s.intersect(r).hit().is_some() {
+                canvas.write(x, y, color);
+            }
+        }
+    }
 
-    // the size of a pixel in world units.
-    let pixel_size = wall_size / (pixels as f64);
-    println!("pixel size: {pixel_size}");
-
-    let half = (pixels as f64) / 2.0 * pixel_size;
-    println!("half: {half}");
-
+    let elapsed = start.elapsed() / 1000 * 1000;
+    let per_pixel = elapsed / ((width * height) as u32);
+    println!("render complete ({elapsed:?}) ({per_pixel:?} / pixel)");
     let ppm = canvas.ppm();
     fs::write("scene.ppm", ppm).expect("could not write scene");
-
-    let wall_ul = point(-half, half, wall_z);
-    let wall_ur = point(half, half, wall_z);
-    let wall_bl = point(-half, -half, wall_z);
-    let wall_br = point(half, -half, wall_z);
-
-    // render the middle line
-
     assert!(Command::new("open")
         .args(["scene.ppm"])
         .output()
