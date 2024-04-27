@@ -47,7 +47,7 @@ impl Sphere {
     }
 
     pub fn normal_at(&self, p: Point) -> Vector {
-        todo!()
+        (p - self.origin).normalize()
     }
 }
 
