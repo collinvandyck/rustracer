@@ -22,6 +22,15 @@ impl Sphere {
         }
     }
 
+    pub fn with_transform(mut self, tf: Matrix) -> Self {
+        self.tf = tf;
+        self
+    }
+
+    pub fn set_transform(&mut self, tf: Matrix) {
+        self.tf = tf;
+    }
+
     pub fn intersect(&self, ray: Ray) -> Intersections {
         let ray = ray.transform(self.tf.inverse());
         let sphere_to_ray: Vector = ray.origin().sub(self.origin);
@@ -37,13 +46,8 @@ impl Sphere {
         intersections([intersection(t1, *self), intersection(t2, *self)])
     }
 
-    pub fn with_transform(mut self, tf: Matrix) -> Self {
-        self.tf = tf;
-        self
-    }
-
-    pub fn set_transform(&mut self, tf: Matrix) {
-        self.tf = tf;
+    pub fn normal_at(&self, p: Point) -> Vector {
+        todo!()
     }
 }
 
@@ -133,5 +137,70 @@ mod tests {
         s.set_transform(translation(5, 0, 0));
         let xs = s.intersect(r);
         assert_eq!(xs, Intersections::default());
+    }
+
+    #[test]
+    fn normal_on_a_sphere_at_a_point_on_the_x_axis() {
+        let s = sphere();
+        let n = s.normal_at(point(1, 0, 0));
+        assert_eq!(n, vector(1, 0, 0));
+    }
+
+    #[test]
+    fn normal_on_a_sphere_at_a_point_on_the_y_axis() {
+        let s = sphere();
+        let n = s.normal_at(point(0, 1, 0));
+        assert_eq!(n, vector(0, 1, 0));
+    }
+
+    #[test]
+    fn normal_on_a_sphere_at_a_point_on_the_z_axis() {
+        let s = sphere();
+        let n = s.normal_at(point(0, 0, 1));
+        assert_eq!(n, vector(0, 0, 1));
+    }
+
+    #[test]
+    fn normal_on_a_sphere_at_a_nonaxial_point() {
+        let s = sphere();
+        let n = s.normal_at(point(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        ));
+        assert_eq!(
+            n,
+            vector(
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0
+            )
+        );
+    }
+
+    #[test]
+    fn the_normal_is_a_normalized_vector() {
+        let s = sphere();
+        let n = s.normal_at(point(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        ));
+        assert_eq!(
+            n,
+            vector(
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0
+            )
+        );
+        assert_eq!(
+            n.normalize(),
+            vector(
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0
+            )
+        );
     }
 }
