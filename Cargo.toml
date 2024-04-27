@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.79"
+clap = { version = "4.5.4", features = ["derive"] }
 itertools = "0.12.1"
 once_cell = "1.19.0"
 

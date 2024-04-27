@@ -1,14 +1,31 @@
+use clap::Parser;
 use rustracer::{canvas::canvas, prelude::*};
 use std::{fs, process::Command, time::Instant};
 
+#[derive(Debug, clap::Parser)]
+struct Args {
+    #[arg(long)]
+    alter: bool,
+}
+
 fn main() {
+    let args = Args::parse();
     let start = Instant::now();
     let dim = 500;
     let width = dim;
     let height = dim;
     let mut canvas = canvas(width, height);
 
-    let s = sphere();
+    let s = if args.alter {
+        sphere().with_transform(
+            identity()
+                .scaling(1, 0.5, 1)
+                .scaling(0.5, 1.5, 1)
+                .shearing(1, 0, 0, 0, 0, 0),
+        )
+    } else {
+        sphere()
+    };
     let wall_z = 10.0;
     let wall_size = 7.0;
     let pixel_size = wall_size / (dim as f64);

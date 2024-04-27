@@ -37,6 +37,11 @@ impl Sphere {
         intersections([intersection(t1, *self), intersection(t2, *self)])
     }
 
+    pub fn with_transform(mut self, tf: Matrix) -> Self {
+        self.tf = tf;
+        self
+    }
+
     pub fn set_transform(&mut self, tf: Matrix) {
         self.tf = tf;
     }
