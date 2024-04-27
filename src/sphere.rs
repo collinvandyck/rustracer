@@ -46,14 +46,19 @@ impl Sphere {
         intersections([intersection(t1, *self), intersection(t2, *self)])
     }
 
-    pub fn normal_at(&self, p: Point) -> Vector {
-        (p - self.origin).normalize()
+    pub fn normal_at(&self, world_point: Point) -> Vector {
+        let obj_point = self.tf.inverse().mul_point(world_point);
+        let obj_normal = obj_point - point(0, 0, 0);
+        let mut world_normal = self.tf.inverse().transpose().mul_vector(obj_normal);
+        world_normal.set_w(0.0);
+        world_normal.normalize()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::f64::consts::{PI, SQRT_2};
 
     #[test]
     fn ray_intersects_sphere_at_two_points() {
@@ -202,5 +207,22 @@ mod tests {
                 f64::sqrt(3.0) / 3.0
             )
         );
+    }
+
+    #[test]
+    fn computing_normal_on_translated_sphere() {
+        let s = sphere().with_transform(translation(0, 1, 0));
+        let n = s.normal_at(point(0, 1.70711, -0.70711));
+        assert_eq!(n, vector(0, 0.70711, -0.70711));
+    }
+
+    // https://forum.devtalk.com/t/the-ray-tracer-challenge-computing-the-normal-on-a-transformed-sphere-ebook-test/5831
+    #[test]
+    fn computing_normal_on_transformed_sphere() {
+        let mut s = sphere();
+        let m = scaling(1, 0.5, 1).mul_matrix(rotation_z(PI / 5.0));
+        s.set_transform(m);
+        let n = s.normal_at(point(0.0, SQRT_2 / 2.0, -SQRT_2 / 2.0));
+        assert_eq!(n, vector(0, 0.97014, -0.24254));
     }
 }
